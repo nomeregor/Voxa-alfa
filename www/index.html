@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voxa — мессенджер</title>
+<style>
+:root{--bg:#f4f7f6;--panel:#fff;--ink:#10202b;--mute:#6b7c88;--acc:#0fb5a0;--acc2:#ffb84d;--me:#0fb5a0;--meink:#fff;--them:#e8eef0;--line:#dfe7ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b141b;--panel:#111e27;--ink:#e8f1f4;--mute:#7f929d;--them:#1b2c37;--line:#1e303b;--me:#12a591}}
+:root[data-theme=dark]{--bg:#0b141b;--panel:#111e27;--ink:#e8f1f4;--mute:#7f929d;--them:#1b2c37;--line:#1e303b;--me:#12a591}
+*{box-sizing:border-box;margin:0}html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",Roboto,system-ui,sans-serif;overflow:hidden}
+button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#app{height:100%;display:flex;max-width:1100px;margin:auto;background:var(--panel)}
+.side{width:340px;border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.top{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.top h1{font-size:20px;font-weight:700;flex:1}
+.logo{width:36px;height:36px;border-radius:12px;flex:none}
+.search{margin:0 14px 8px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);width:calc(100% - 28px)}
+.list{overflow:auto;flex:1}
+.row{display:flex;gap:12px;padding:10px 14px;width:100%;text-align:left;align-items:center}
+.row:hover,.row.on{background:var(--bg)}
+.av{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.row b{display:block}.row small{color:var(--mute);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.head{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.head .t{flex:1}.head small{color:var(--mute)}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px}.ib:hover{background:var(--bg)}
+.msgs{flex:1;overflow:auto;padding:16px 14px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:min(75%,520px);padding:8px 12px;border-radius:18px;background:var(--them);word-wrap:break-word}
+.m.me{align-self:flex-end;background:var(--me);color:var(--meink);border-bottom-right-radius:6px}
+.m.th{border-bottom-left-radius:6px}
+.m i{display:block;font-size:11px;opacity:.65;font-style:normal;text-align:right;margin-top:2px}
+.empty{margin:auto;text-align:center;color:var(--mute);max-width:280px}
+.send{display:flex;gap:8px;padding:10px 14px;background:var(--panel);border-top:1px solid var(--line)}
+.send input{flex:1;padding:11px 16px;border-radius:22px;border:1px solid var(--line);background:var(--bg)}
+.go{width:44px;height:44px;border-radius:50%;background:var(--acc);color:#04201c;font-size:18px}
+.back{display:none}
+.login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;padding:20px;z-index:5}
+.card{background:var(--panel);padding:28px;border-radius:24px;max-width:380px;width:100%;text-align:center;border:1px solid var(--line)}
+.card .logo{width:88px;height:88px;border-radius:28px;margin-bottom:12px}
+.card p{color:var(--mute);margin:6px 0 18px}
+.card input{width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px;text-align:center}
+.btn{background:var(--acc);color:#04201c;font-weight:700;padding:12px 20px;border-radius:14px;width:100%}
+.call{position:fixed;inset:0;background:linear-gradient(160deg,#0e2a33,#0b141b 70%);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:6;text-align:center}
+.call.on{display:flex}.call .av{width:132px;height:132px;border-radius:44px;font-size:48px;margin-bottom:10px}
+.call h2{font-size:26px}.call .st{opacity:.7}
+.ring{animation:r 1.6s ease-out infinite}@keyframes r{0%{box-shadow:0 0 0 0 #0fb5a099}100%{box-shadow:0 0 0 40px #0fb5a000}}
+.acts{display:flex;gap:22px;margin-top:40px}.acts button{width:64px;height:64px;border-radius:50%;background:#ffffff22;font-size:24px;color:#fff}
+.acts .end{background:#ef4b4b}.acts .on2{background:#fff;color:#0b141b}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;display:none;z-index:9;max-width:90%}
+@media(max-width:720px){.side{width:100%;border:0}.main{position:fixed;inset:0;z-index:3;transform:translateX(100%);transition:transform .2s}.main.open{transform:none}.back{display:grid}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.pick{display:none;background:var(--panel);border-top:1px solid var(--line);padding:8px 14px}.pick.on{display:block}
+.tabs{display:flex;gap:6px;margin-bottom:6px}.tabs button{padding:6px 12px;border-radius:12px;color:var(--mute)}.tabs .on{background:var(--bg);color:var(--ink);font-weight:700}
+.grid{display:flex;flex-wrap:wrap;gap:2px;max-height:180px;overflow:auto}.grid button{width:44px;height:44px;font-size:24px;border-radius:10px}.grid button:hover{background:var(--bg)}.grid .big{width:76px;height:76px;font-size:46px}
+.m.st{background:none;color:var(--mute);font-size:64px;line-height:1.1;padding:4px 8px}.m.st i{font-size:11px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="lg" viewBox="0 0 120 120"><rect width="120" height="120" rx="34" fill="#0e2a33"/><path d="M36 84V52a24 24 0 0 1 24-24h0a24 24 0 0 1 24 24v0a24 24 0 0 1-24 24H48" fill="none" stroke="#5eead4" stroke-width="10" stroke-linecap="round"/><path d="M48 76c0 14 12 20 30 14" fill="none" stroke="#ffb84d" stroke-width="10" stroke-linecap="round"/><circle cx="84" cy="52" r="6" fill="#ffb84d"/></symbol></defs></svg>
+
+<div class="login" id="login"><div class="card">
+<svg class="logo"><use href="#lg"/></svg><h1>Voxa</h1>
+<p>Выбери юзернейм. По нему тебя найдут и смогут написать или позвонить.</p>
+<input id="un" placeholder="@username" maxlength="24" autocomplete="off">
+<button class="btn" id="enter">Войти</button></div></div>
+
+<div id="app">
+<section class="side">
+<div class="top"><svg class="logo"><use href="#lg"/></svg><h1>Voxa</h1><button class="ib" id="theme" aria-label="Тема">◐</button></div>
+<input class="search" id="q" placeholder="Найти по @юзернейму">
+<div class="list" id="list"></div></section>
+<section class="main" id="main">
+<div class="head"><button class="ib back" id="back" aria-label="Назад">←</button><div class="av" id="hav"></div><div class="t"><b id="hn"></b><small id="hs"></small></div><button class="ib" id="cb" aria-label="Позвонить">📞</button></div>
+<div class="msgs" id="msgs"><div class="empty">Выбери чат слева или найди человека по @юзернейму.</div></div>
+<div class="pick" id="pick"></div>
+<form class="send" id="f"><button type="button" class="ib" id="eb" aria-label="Эмодзи и стикеры">😊</button><input id="t" placeholder="Сообщение" autocomplete="off"><button class="go" aria-label="Отправить">➤</button></form>
+</section></div>
+
+<div class="call" id="call"><div class="av ring" id="cav"></div><h2 id="cn"></h2><div class="st" id="cs">Вызов…</div>
+<div class="acts"><button id="mute" aria-label="Микрофон">🎤</button><button class="end" id="end" aria-label="Завершить">✕</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const COL=["#0fb5a0","#e0803a","#6a5ae0","#d9467a","#3a8fe0","#7aa62c"];
+const col=n=>COL[[...n].reduce((a,c)=>a+c.charCodeAt(0),0)%COL.length];
+const ini=n=>n.replace("@","").slice(0,2).toUpperCase();
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SERVER=""; // сюда вставь адрес Worker, например https://voxa.имя.workers.dev
+let me=null,cur=null,tok=null,store={chats:{}};
+async function api(p,b){const r=await fetch(SERVER+p,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)});return r.json()}
+function poll(){if(!SERVER||!me||!tok)return;api("/poll",{u:me,k:tok}).then(r=>{const a=r.msgs||[];a.forEach(m=>{ensure(m.f);store.chats[m.f].push({t:m.b,me:0,time:time()})});if(a.length){save();if(cur)renderMsgs();renderList()}}).catch(()=>{})}
+setInterval(poll,2000);
+const demo={"@maria":"Привет! Это демо-собеседник.","@alex":"Здорово! Как тебе Voxa?","@garage":"Номера на месте, гараж ждёт."};
+function save(){try{localStorage.setItem("nit",JSON.stringify({me,store,tok}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem("nit")||"null");if(d){me=d.me;store=d.store;tok=d.tok||null}}catch(e){}}
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.x);toast.x=setTimeout(()=>e.style.display="none",3200)}
+function avatar(el,n){el.textContent=ini(n);el.style.background=col(n)}
+function time(){return new Date().toLocaleTimeString("ru",{hour:"2-digit",minute:"2-digit"})}
+function ensure(u){if(!store.chats[u])store.chats[u]=[]}
+function renderList(){const L=$("#list");L.innerHTML="";
+ Object.keys(store.chats).forEach(u=>{const m=store.chats[u],last=m[m.length-1];
+  const b=document.createElement("button");b.className="row"+(u===cur?" on":"");
+  b.innerHTML=`<div class="av"></div><div><b>${esc(u)}</b><small>${last?esc(last.t.startsWith(STK)?"Стикер "+last.t.slice(STK.length):last.t):"Нет сообщений"}</small></div>`;
+  avatar(b.firstChild,u);b.onclick=()=>open(u);L.append(b)});
+ if(!L.children.length)L.innerHTML='<div class="empty" style="padding:30px 14px">Чатов пока нет. Введи @юзернейм в поиск и нажми Enter.</div>'}
+function renderMsgs(){const M=$("#msgs");M.innerHTML="";const a=store.chats[cur]||[];
+ if(!a.length)M.innerHTML='<div class="empty">Напиши первое сообщение.</div>';
+ a.forEach(x=>{const s=x.t.startsWith(STK),d=document.createElement("div");d.className="m "+(x.me?"me":"th")+(s?" st":"");d.innerHTML=esc(s?x.t.slice(STK.length):x.t)+`<i>${x.time}</i>`;M.append(d)});
+ M.scrollTop=M.scrollHeight}
+function open(u){cur=u;ensure(u);avatar($("#hav"),u);$("#hn").textContent=u;$("#hs").textContent="в сети";
+ $("#main").classList.add("open");renderMsgs();renderList()}
+$("#back").onclick=()=>$("#main").classList.remove("open");
+$("#q").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();
+ let v=$("#q").value.trim().toLowerCase().replace(/^@?/,"@");if(!/^@[a-z0-9_]{3,24}$/.test(v)){toast("Юзернейм: 3–24 символа, латиница, цифры, _");return}
+ if(v===me){toast("Это твой юзернейм");return}
+ const go=()=>{ensure(v);$("#q").value="";save();open(v)};if(!SERVER)return go();api("/exists",{u:v}).then(r=>r.ok?go():toast("Такого юзернейма нет")).catch(()=>toast("Нет связи с сервером"))});
+$("#f").onsubmit=e=>{e.preventDefault();sendText($("#t").value.trim())};
+function sendText(v){if(!v||!cur)return;
+ store.chats[cur].push({t:v,me:1,time:time()});if(!v.startsWith(STK))$("#t").value="";save();renderMsgs();renderList();
+ const u=cur;if(SERVER&&!demo[u])api("/send",{u:me,k:tok,to:u,b:v}).then(r=>{if(!r.ok)toast("Не доставлено: "+(r.err||"ошибка"))}).catch(()=>toast("Нет связи с сервером"));if(demo[u]){setTimeout(()=>{store.chats[u].push({t:demo[u],me:0,time:time()});save();if(cur===u)renderMsgs();renderList()},900)}
+ else if(!SERVER&&store.chats[u].filter(x=>x.me).length===1)toast("Демо-режим: доставка реальным людям появится после подключения сервера.")};
+const STK="§s§";
+const EM="😀😂🥹😍😎🤔😴😡😭🥳🤯🫡👍👎👏🙏💪🔥✨💯❤️💔🎉🚗🏁🔑💰🎁🌙☀️🍀🐱🐶🦊🍕☕".match(/\p{Extended_Pictographic}\uFE0F?/gu);
+const SK=["🦊","🐱","🐶","🐼","🚗","🏎️","🔥","💎","👑","🎉","❤️","😂"];
+let tab=0;
+function drawPick(){const p=$("#pick");p.innerHTML='<div class="tabs"><button type="button" data-i="0" class="'+(tab?'':'on')+'">Эмодзи</button><button type="button" data-i="1" class="'+(tab?'on':'')+'">Стикеры</button></div><div class="grid"></div>';
+ const g=p.querySelector(".grid");(tab?SK:EM).forEach(e=>{const b=document.createElement("button");b.type="button";b.textContent=e;if(tab)b.className="big";b.onclick=()=>{if(tab){sendText(STK+e)}else{$("#t").value+=e;$("#t").focus()}};g.append(b)});
+ p.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{tab=+b.dataset.i;drawPick()})}
+$("#eb").onclick=()=>{const p=$("#pick");p.classList.toggle("on");if(p.classList.contains("on"))drawPick()};
+let timer=null,sec=0;
+$("#cb").onclick=()=>{if(!cur)return;avatar($("#cav"),cur);$("#cn").textContent=cur;$("#cs").textContent="Вызов…";$("#call").classList.add("on");
+ sec=0;clearTimeout(timer);timer=setTimeout(()=>{$("#cs").textContent="00:00";timer=setInterval(()=>{sec++;$("#cs").textContent=String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0")},1000)},2200);
+ toast("Демо экрана звонка. Реальный звук подключается через WebRTC.")};
+$("#end").onclick=()=>{clearInterval(timer);clearTimeout(timer);$("#call").classList.remove("on")};
+$("#mute").onclick=e=>{e.currentTarget.classList.toggle("on2")};
+$("#theme").onclick=()=>{const r=document.documentElement,d=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);r.dataset.theme=d?"light":"dark"};
+$("#enter").onclick=()=>{const v="@"+$("#un").value.trim().toLowerCase().replace(/^@/,"");
+ if(!/^@[a-z0-9_]{3,24}$/.test(v)){toast("Юзернейм: 3–24 символа, латиница, цифры, _");return}
+ if(!SERVER){me=v;Object.keys(demo).forEach(ensure);save();$("#login").style.display="none";renderList();return}
+ const k=tok||crypto.randomUUID()+crypto.randomUUID();
+ api("/register",{u:v,k}).then(r=>{if(!r.ok){toast("Юзернейм занят");return}me=v;tok=k;Object.keys(demo).forEach(ensure);save();$("#login").style.display="none";renderList()}).catch(()=>toast("Нет связи с сервером"))};
+load();if(me){$("#login").style.display="none";renderList()}
+</script></body></html>
